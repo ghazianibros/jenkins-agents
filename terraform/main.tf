@@ -1,16 +1,25 @@
-# Provider Configurations
 terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = ">=5.20.0"
+      version = "~> 5.23.1"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.5.1"
+    }
+    archive = {
+      source  = "hashicorp/archive"
+      version = "~> 2.4.0"
     }
   }
+
+  required_version = "~> 1.2"
 }
 
 provider "aws" {
   region  = "us-east-1"
-  profile = "default"
+  profile = "gt-swdev"
 }
 
 
@@ -18,7 +27,7 @@ provider "aws" {
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
-  name = "jenkins-vpc"
+  name = "jenkins-vpc-test"
   cidr = "10.0.0.0/16"
 
   azs             = ["us-east-1a", "us-east-1b", "us-east-1c"]
@@ -32,7 +41,7 @@ module "vpc" {
   enable_vpn_gateway = false
 
   tags = {
-    Environment = "prod"
+    Environment = "jenkins-vpc-test"
     Purpose     = "Jenkins infrastructure set up"
   }
 }
@@ -47,20 +56,20 @@ module "jenkins-controller" {
   jenkins_server_subnetid = module.vpc.public_subnets[0]
 }
 
-# Create Jenkins-agents
-module "jenkins-agents" {
-  source = "./modules/jenkins-agents"
+# # Create Jenkins-agents
+# module "jenkins-agents" {
+#   source = "./modules/jenkins-agents"
 
-  efs_sg_subnet_a     = module.vpc.private_subnets[0]
-  efs_sg_subnet_b     = module.vpc.private_subnets[1]
-  efs_sg_subnet_c     = module.vpc.private_subnets[2]
-  efs_mount_sg        = [module.security_groups.Allow_NFS_id]
-  image_id            = "ami-0c7217cdde317cfec"
-  instance_type       = "t2.micro"
-  instance_profile = module.jenkins-controller.instance_profile
-  vpc_zone_identifier = flatten([module.vpc.private_subnets[*]])
-  security_group_id   = [module.security_groups.jenkins-sg_id]
-}
+#   efs_sg_subnet_a     = module.vpc.private_subnets[0]
+#   efs_sg_subnet_b     = module.vpc.private_subnets[1]
+#   efs_sg_subnet_c     = module.vpc.private_subnets[2]
+#   efs_mount_sg        = [module.security_groups.Allow_NFS_id]
+#   image_id            = "ami-0c7217cdde317cfec"
+#   instance_type       = "t2.micro"
+#   instance_profile = module.jenkins-controller.instance_profile
+#   vpc_zone_identifier = flatten([module.vpc.private_subnets[*]])
+#   security_group_id   = [module.security_groups.jenkins-sg_id]
+# }
 
 module "security_groups" {
   source = "./modules/security-groups"

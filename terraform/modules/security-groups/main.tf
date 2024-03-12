@@ -47,6 +47,6 @@ resource "aws_security_group" "Allow_NFS" {
 
   tags = {
     Name        = "jenkins-agents-efs-sg",
-    Environment = "prod"
+    Environment = "dev"
   }
 }

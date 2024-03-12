@@ -1,7 +1,7 @@
 # Use data source to invoke user data
-data "template_file" "user_data1" {
-  template = file("./userdata.sh")
-}
+# data "template_file" "user_data1" {
+#   template = file("./userdata.sh")
+# }
 
 resource "aws_instance" "jenkins-server" {
   ami                    = var.ami
@@ -10,7 +10,8 @@ resource "aws_instance" "jenkins-server" {
   vpc_security_group_ids = var.jenkins_server_sgid
   associate_public_ip_address = true
   iam_instance_profile = aws_iam_instance_profile.server_profile.name
-  user_data              = data.template_file.user_data1.rendered
+  # user_data              = file("./tools-install.sh")
+  user_data              = file("userdata.sh")
 
   tags = {
     Name        = "Jenkins-Controller"
